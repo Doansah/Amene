@@ -1,0 +1,144 @@
+JGraphT example implememntation and use: 
+here is an example of how we would use Graph structure to inform learning experience.
+ie. breadth first graph = focus on overview
+ie. depth first graph = focus on sequence and highlight that to learner 
+
+This is a rough example, not to be followed directly, but to be understood. 
+
+import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
+import org.jgrapht.alg.scoring.BetweennessCentrality;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class KnowledgeGraphDemo {
+
+    // --- Your domain vertex
+    static record TopicNode(String id, String name) {
+        @Override public String toString() { return name; }
+    }
+
+    // Convenience to add a weighted REQUIRES edge: u -> v
+    static void requires(Graph<TopicNode, DefaultWeightedEdge> g,
+                         TopicNode u, TopicNode v, double importance, double coverage) {
+        DefaultWeightedEdge e = g.addEdge(u, v);
+        g.setEdgeWeight(e, importance * coverage); // simple MVP weight
+    }
+
+    public static void main(String[] args) {
+        // 1) Build a REQUIRES DAG for Client–Server goal
+        Graph<TopicNode, DefaultWeightedEdge> g =
+            new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+
+        TopicNode CLIENT_SERVER = new TopicNode("client_server", "Client–Server Model");
+        TopicNode HTTP         = new TopicNode("http_basics", "HTTP Basics");
+        TopicNode NETWORKING   = new TopicNode("networking", "Networking (IP, DNS)");
+        TopicNode CODING       = new TopicNode("coding_basics", "Coding Basics");
+        TopicNode INTERNET     = new TopicNode("internet", "The Internet (context)");
+
+        Graphs.addAllVertices(g, List.of(CLIENT_SERVER, HTTP, NETWORKING, CODING, INTERNET));
+
+        // prereq -> topic (REQUIRES)
+        requires(g, HTTP,       CLIENT_SERVER, 9, 0.8);
+        requires(g, CODING,     CLIENT_SERVER, 5, 0.5);
+        requires(g, NETWORKING, CLIENT_SERVER, 3, 0.3);
+        // post-context (not a prereq, but if you ever treat PRECEDES as requires use weight small)
+        // requires(g, CLIENT_SERVER, INTERNET, 5, 0.5); // keep REQUIRES-only for analysis
+
+        // 2) Compute basic metrics
+
+        // 2a) Depth levels (topo DP for longest distance to each node)
+        Map<TopicNode, Integer> level = longestLevelsInDAG(g);
+        int D = level.values().stream().max(Integer::compareTo).orElse(0);
+
+        // 2b) Average branching near the goal (L1 prereqs = in-neighbors of goal)
+        List<TopicNode> L1 = Graphs.predecessorListOf(g, CLIENT_SERVER);
+        double B = L1.stream().mapToInt(g::outDegreeOf).average().orElse(0);
+
+        // 2c) Betweenness centrality (to find leverage nodes)
+        var bc = new BetweennessCentrality<>(g).getScores();
+        TopicNode topCentrality =
+            bc.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(CLIENT_SERVER);
+
+        // 2d) Simple “depth spine” (longest weighted path to goal via topo DP)
+        List<TopicNode> depthSpine = longestWeightedPathTo(g, CLIENT_SERVER);
+
+        // 3) Print report → drives recommendations
+        System.out.println("Depth D = " + D);
+        System.out.println("Avg branching B (around goal) = " + String.format("%.2f", B));
+        System.out.println("Top betweenness = " + topCentrality);
+        System.out.println("Depth spine to goal = " + depthSpine);
+
+        // 4) Use simple knobs to choose plan style
+        double breadthScore = B + 0.5 * L1.size();
+        double depthScore   = D + 0.5 * depthSpine.size();
+        String plan = (breadthScore > depthScore) ? "BREADTH_FIRST_PRIMER" : "DEPTH_SPINE";
+        System.out.println("Recommended plan: " + plan);
+    }
+
+    // Longest “level” in DAG (unweighted): DP over topological order
+    static Map<TopicNode, Integer> longestLevelsInDAG(Graph<TopicNode, DefaultWeightedEdge> g) {
+        Map<TopicNode, Integer> dist = new HashMap<>();
+        for (TopicNode v : g.vertexSet()) dist.put(v, 0);
+        TopologicalOrderIterator<TopicNode, DefaultWeightedEdge> it =
+            new TopologicalOrderIterator<>(g);
+        while (it.hasNext()) {
+            TopicNode u = it.next();
+            for (DefaultWeightedEdge e : g.outgoingEdgesOf(u)) {
+                TopicNode v = g.getEdgeTarget(e);
+                dist.put(v, Math.max(dist.get(v), dist.get(u) + 1));
+            }
+        }
+        return dist;
+    }
+
+    // Longest weighted path ending at 'goal' in DAG (simple DP + backpointers)
+    static List<TopicNode> longestWeightedPathTo(Graph<TopicNode, DefaultWeightedEdge> g, TopicNode goal) {
+        Map<TopicNode, Double> dp = new HashMap<>();
+        Map<TopicNode, TopicNode> parent = new HashMap<>();
+        for (TopicNode v : g.vertexSet()) { dp.put(v, (v.equals(goal) ? 0.0 : Double.NEGATIVE_INFINITY)); }
+
+        // Reverse topo: process predecessors toward sources
+        List<TopicNode> topo = new ArrayList<>();
+        TopologicalOrderIterator<TopicNode, DefaultWeightedEdge> it = new TopologicalOrderIterator<>(g);
+        while (it.hasNext()) topo.add(it.next());
+        Collections.reverse(topo);
+
+        for (TopicNode v : topo) {
+            for (DefaultWeightedEdge e : g.incomingEdgesOf(v)) {
+                TopicNode u = g.getEdgeSource(e);
+                double w = g.getEdgeWeight(e);
+                if (dp.get(v) + w > dp.get(u)) {
+                    dp.put(u, dp.get(v) + w);
+                    parent.put(u, v);
+                }
+            }
+        }
+        // Pick best source (max dp)
+        TopicNode start = dp.entrySet().stream().max(Map.Entry.comparingByValue).map(Map.Entry::getKey).orElse(goal);
+        // Reconstruct u -> ... -> goal
+        List<TopicNode> path = new ArrayList<>();
+        for (TopicNode cur = start; cur != null; cur = parent.get(cur)) path.add(cur);
+        return path;
+    }
+}
+
+JGraphT provides us with: 
+
+D (max depth) → how “deep” the prereq chain is.
+
+
+B (avg branching near goal) → how “broad” the first layer is.
+
+
+topCentrality → great spine candidate for a depth-first start.
+
+
+depthSpine → concrete ordered chain to teach first (if depth-first wins).
+
+
+A trivial plan selector: if breadth signal (branching) dominates, do Breadth-First Primer; else do Depth Spine.
