@@ -1,0 +1,88 @@
+{
+  "centralTopicId": "learn-web",
+  "topics": [
+    {
+      "id": "learn-web",
+      "name": "Learn Web Development",
+      "nodeKind": "CENTRAL",
+      "description": "Goal for the learner",
+      "goal": "Deliver full-stack apps",
+      "tags": ["overview"],
+      "difficultyBand": "INTRO",
+      "importanceBand": "CRITICAL",
+      "breadthBias": 0.6,
+      "depthBias": 0.4,
+      "featureFlags": ["long_context"],
+      "metadata": {
+        "source": "llm"
+      }
+    },
+    {
+      "id": "client-server",
+      "name": "Client-Server Model",
+      "nodeKind": "MAJOR",
+      "description": "Interaction pattern between clients and servers",
+      "goal": "Frame request/response thinking",
+      "tags": ["architecture"],
+      "difficultyBand": "BASIC",
+      "importanceBand": "CORE",
+      "breadthBias": 0.5,
+      "depthBias": 0.5,
+      "featureFlags": [],
+      "metadata": {}
+    },
+    {
+      "id": "http-basics",
+      "name": "HTTP Basics",
+      "nodeKind": "BASIC",
+      "description": "Protocols powering the web",
+      "goal": "Support client-server",
+      "tags": ["protocol"],
+      "difficultyBand": "BASIC",
+      "importanceBand": "CORE",
+      "breadthBias": 0.3,
+      "depthBias": 0.7,
+      "featureFlags": [],
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "sourceId": "client-server",
+      "targetId": "learn-web",
+      "relationType": "REQUIRES",
+      "importance": 8,
+      "coverage": 6,
+      "andGroup": null,
+      "notes": "Key mental model",
+      "evidence": []
+    },
+    {
+      "sourceId": "http-basics",
+      "targetId": "client-server",
+      "relationType": "REQUIRES",
+      "importance": 7,
+      "coverage": 5,
+      "andGroup": null,
+      "notes": "Explains network layer",
+      "evidence": []
+    }
+  ],
+  "practiceBank": [
+    {
+      "id": "practice-1",
+      "type": "MCQ",
+      "primaryTopicId": "learn-web",
+      "secondaryTopicIds": ["client-server"],
+      "difficultyBand": "BASIC",
+      "prompt": "What does HTTP stand for?",
+      "canonicalSolution": "Hypertext Transfer Protocol",
+      "targets": [],
+      "metadata": {}
+    }
+  ],
+  "sources": {
+    "doc": "sample"
+  },
+  "createdAt": "2024-05-01T00:00:00Z"
+}
