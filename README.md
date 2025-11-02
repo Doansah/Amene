@@ -1,46 +1,65 @@
-Before we get into the code I want to lay out the INTIUTION and the REASON I'm building Amene (an Educator Agent)  . 
+Before we get into the code, I want to lay out the intuition and the reason I’m building Amene (an Educator Agent).
 
-1. Learning is Difficult
+⸻
+
+1. Learning Is Difficult
 
 I struggled for a while learning programming, and here are a few reasons why:
+	1.	Coding is built upon a tower of abstractions
+	2.	Beginners (like me) cannot discern what is and isn’t important
+	3.	It’s extremely easy to fall into dependency rabbit holes
+	4.	Beginners (like me) often don’t even know what they want to learn
+	5.	Learning is built on testing and reforming knowledge
 
-1) Coding is built upon a 'tower of abstractions'
-2) Beginners (Me) cannot dicsern what is and isn't important
-3) It is extremely easy to go in to 'dependency rabbit holes'
-4) Beginners (Me) do not know what they even want to learn
-5) Learning is built on Testing and reforming knowledge.
+I’ve written about this in more depth here:
+What Made Programming Hard for Me — Unknown Unknowns￼
 
-I written about this in more depth at: 
-https://medium.com/@dillondoa/what-made-programming-hard-for-me-unknown-unknowns-dc43b327855f
+⸻
 
-My goal is for Amene to help with such problems. 
-More specifically, the goal is to have a system which takes any field of knowledge as input and does the following: 
-1. Give a practical plan for learning 
+2. The Goal of Amene
 
-Some intuitions of knowledge the architecture is built upon (there are more but these are the key ones): 
-This is more philsophical than technical so bare with me: 
+My goal is for Amene to help with such problems.
+More specifically, the goal is to have a system that takes any field of knowledge as input and does the following:
+	1.	Provides a practical plan for learning
+	2.	Creates a Knowledge Map of the given topic
 
-1. Knowledge can be represented as graph:
+Here’s what I mean:
 
-   Where nodes are ideas themselves, and edges are how they relate to each other.
-
-   Goofy Example: Dogs (Node A) is related to Cats (Node B) in that they are BOTH animals.
-   - A Relation of SAMENESS
-     
-
-Micellaneous Ideas I have that are cool, but cant prove (but I still will IMPLEMENT) : 
-
-Given the structure of our Knowledge graph (remember the a set of nodes and edges) we can alter our learning style. 
-
-Consider the difference between learning a historical event vs a biological system. 
-Intuitively, we could say that History of Egypt events requires sequential lens, whereas learning the Human body demands a 'breadth' of information. 
-
-Given that we've compressed our graph into a Data structure, we can analyse its structure to inform HOW we ought to learn the topic. 
-
-'Depth Heavy' ie. ( High level count, etc) 
--  Build a road map, enforce sequential learning
-'Breadth Heavy'
-- Emphasise Context, and inter-relations between ideas.
+<img width="397" height="298" alt="image" src="https://github.com/user-attachments/assets/98697fcf-3169-41a0-a8ab-f93f06a76518" />  
 
 
-And YES I am using AI for code assistance this a side project bro chill. 
+I’m a great artist, I know!
+
+In this case, the user wants to learn the Client-Server Model. This is the central node, and the other topics—Networking, Coding Basics, etc.—are related to it. To understand the Client-Server Model, an understanding of adjacent topics is relevant.
+
+⸻
+
+3. Foundational Intuitions Behind the Architecture
+
+These are more philosophical than technical, so bear with me:
+
+a) Knowledge Can Be Represented as a Graph
+Nodes represent ideas themselves, and edges represent how they relate to one another.
+
+Goofy Example:
+“Dogs” (Node A) is related to “Cats” (Node B) because they are both animals — a relation of sameness.
+
+⸻
+
+4. Miscellaneous Ideas (That Are Cool but Hard to Prove — Still Implementing Anyway)
+
+Given the structure of our knowledge graph (a set of nodes and edges), we can alter our learning style.
+
+Consider the difference between learning a historical event versus a biological system:
+	•	Learning about the History of Egypt requires a sequential lens.
+	•	Learning about the Human Body demands a breadth of information.
+
+Because the graph is represented as a data structure, we can analyze its shape to inform how we ought to learn the topic.
+
+Depth-Heavy Graphs (high level count, etc.)
+	•	Build a roadmap and enforce sequential learning
+
+Breadth-Heavy Graphs
+	•	Emphasize context and interrelations between ideas
+
+⸻
