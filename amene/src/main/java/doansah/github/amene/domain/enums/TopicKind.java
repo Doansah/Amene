@@ -1,7 +1,7 @@
 package doansah.github.amene.domain.enums;
 
 public enum TopicKind {
-    CENTRAL,
-    MAJOR,
+    Source, 
+    MAJOR, // has relations with other Edges, basic only connects to source
     BASIC
 }

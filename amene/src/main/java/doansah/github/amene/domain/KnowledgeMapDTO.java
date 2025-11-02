@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public record KnowledgeMap(
+public record KnowledgeMapDTO(
         String centralTopicId,
         List<TopicNode> topics,
         List<RelationEdge> edges,
@@ -13,7 +13,7 @@ public record KnowledgeMap(
         Map<String, String> sources,
         Instant createdAt
 ) {
-    public KnowledgeMap {
+    public KnowledgeMapDTO {
         Objects.requireNonNull(centralTopicId, "centralTopicId cannot be null");
         if (centralTopicId.isBlank()) {
             throw new IllegalArgumentException("centralTopicId cannot be blank");
